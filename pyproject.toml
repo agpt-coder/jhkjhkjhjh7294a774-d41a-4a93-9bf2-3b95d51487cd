@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "jhkjhkjhjh"
+version = "0.1.0"
+description = "To create a single API endpoint capable of taking in a string LLM prompt and returning a refined version through GPT-4, we will employ the tech stack specified with Python as our programming language, FastAPI for the API framework, PostgreSQL for the database, and Prisma as the ORM. The process starts by setting up a FastAPI project, then integrating the OpenAI Python package to communicate with the GPT-4 model for prompt refinement. Users will submit their prompts to this endpoint, which then forwards the prompt to GPT-4 via the OpenAI package, receives the refined prompt, and returns this to the user."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+fastapi = "^0.75.0"
+openai = "*"
+passlib = {version = "^1.7.4", extras = ["bcrypt"]}
+prisma = "*"
+pydantic = "*"
+python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

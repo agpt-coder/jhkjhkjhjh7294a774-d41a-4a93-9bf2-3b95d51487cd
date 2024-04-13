@@ -1,0 +1,98 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id             String          @id @default(dbgenerated("gen_random_uuid()"))
+  email          String          @unique
+  password       String
+  role           Role
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  prompts        Prompt[]
+  refinedPrompts RefinedPrompt[]
+  apiTokens      APIToken[]
+  accessLogs     AccessLog[]
+}
+
+model Prompt {
+  id            String         @id @default(dbgenerated("gen_random_uuid()"))
+  content       String
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refinedPrompt RefinedPrompt? // This change reflects a one-to-one relation adjusted for correctness according to the error message.
+}
+
+model RefinedPrompt {
+  id             String     @id @default(dbgenerated("gen_random_uuid()"))
+  originalId     String     @unique
+  content        String
+  feedbacks      Feedback[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  originalPrompt Prompt     @relation(fields: [originalId], references: [id])
+  User           User?      @relation(fields: [userId], references: [id])
+  userId         String?
+}
+
+model Feedback {
+  id              String        @id @default(dbgenerated("gen_random_uuid()"))
+  content         String
+  refinedPromptId String
+  refinedPrompt   RefinedPrompt @relation(fields: [refinedPromptId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model APIToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ErrorLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  error     String
+  details   Json
+  createdAt DateTime @default(now())
+}
+
+model APIVersion {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  version   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AccessLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  endpoint  String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  Admin
+  User
+  Guest
+}
+
